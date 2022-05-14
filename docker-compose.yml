@@ -2,6 +2,19 @@ version: '3.7'
 
 services:
 
+  postgres_database:
+    image: postgres:latest
+    container_name: postgres_database
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=postgres_database
+    ports:
+      - "5432:5432"
+    volumes: 
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
   app:
     container_name: multipurpose_api
     build:
