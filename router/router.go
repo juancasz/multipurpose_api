@@ -39,6 +39,7 @@ func routesMultipurposeAPI(calculator handler.CalculatorHandler) http.Handler {
 	r := chi.NewRouter()
 
 	r.Post("/order-array", calculator.OrderArray)
+	r.Post("/balance-months", calculator.BalanceMonths)
 
 	return r
 }
