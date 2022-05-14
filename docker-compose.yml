@@ -1,0 +1,15 @@
+version: '3.7'
+
+services:
+
+  app:
+    container_name: multipurpose_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    restart: on-failure
+    image: multipurpose_api
+    environment:
+      - "PORT=8888"
