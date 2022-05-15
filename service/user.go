@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"multipurpose_api/model"
 
@@ -29,23 +30,15 @@ type UserManager struct {
 	userManager userManagerRepository
 }
 
-func (u *UserManager) AddUser(ctx context.Context, user *model.User) error {
+func (u *UserManager) AddUser(ctx context.Context, user *model.User) (string, error) {
 	user.Id = uuid.New().String()
-	user.UserIDCreator = "00000000-0000-0000-0000-000000000000"
-	return u.userManager.AddUser(ctx, user)
+	key := fmt.Sprintf("%s:%s", user.Username, user.Password)
+	user.HashToken = base64.StdEncoding.EncodeToString([]byte(key))
+	return user.Id, u.userManager.AddUser(ctx, user)
 }
 
 func (u *UserManager) GetUser(ctx context.Context, user *model.UserInfo) error {
-	id := user.Id
-	if err := u.userManager.GetUser(ctx, user); err != nil {
-		return err
-	}
-
-	if user.Id == "" {
-		return fmt.Errorf("%w: user with id %s not found", ErrUserNotFound, id)
-	}
-
-	return nil
+	return u.userManager.GetUser(ctx, user)
 }
 
 func (u *UserManager) EditUser(ctx context.Context, user *model.User) error {

@@ -3,11 +3,9 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"log"
+	basicauth "multipurpose_api/infrastructure/basic_auth"
 	"multipurpose_api/model"
-	"multipurpose_api/service"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -16,7 +14,7 @@ import (
 )
 
 type userManagerService interface {
-	AddUser(ctx context.Context, user *model.User) error
+	AddUser(ctx context.Context, user *model.User) (string, error)
 	GetUser(ctx context.Context, user *model.UserInfo) error
 	EditUser(ctx context.Context, user *model.User) error
 	DeleteUser(ctx context.Context, user *model.UserInfo) error
@@ -76,14 +74,24 @@ func (u *UserManager) AddUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.HashPassword == "" {
+	if user.Password == "" {
 		w.Header().Add("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(Response{"error": `required field "hash_password" is missing or empty`})
+		json.NewEncoder(w).Encode(Response{"error": `required field "password" is missing or empty`})
 		return
 	}
 
-	err = u.userManager.AddUser(r.Context(), &user)
+	userIDRequest, err := basicauth.UserIDFromRequest(r)
+	if err != nil {
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(Response{"error": err.Error()})
+		return
+	}
+
+	user.UserIDCreator = userIDRequest
+
+	userIDcreated, err := u.userManager.AddUser(r.Context(), &user)
 
 	pErr, ok := err.(*pq.Error)
 	if ok {
@@ -105,7 +113,9 @@ func (u *UserManager) AddUser(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(Response{"message": "success"})
+	json.NewEncoder(w).Encode(Response{
+		"user_id": userIDcreated,
+		"message": "success"})
 }
 
 func (u *UserManager) GetUser(w http.ResponseWriter, r *http.Request) {
@@ -124,11 +134,16 @@ func (u *UserManager) GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = u.userManager.GetUser(r.Context(), &user)
-	if errors.Is(err, service.ErrUserNotFound) {
-		w.Header().Add("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(Response{"error": err.Error()})
-		return
+
+	pErr, ok := err.(*pq.Error)
+	if ok {
+		switch string(pErr.Code) {
+		case P_ERR_DATA_NOT_FOUND:
+			w.Header().Add("Content-Type", "application/json; charset=utf-8")
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(Response{"error": err.Error()})
+			return
+		}
 	}
 
 	if err != nil {
@@ -185,15 +200,23 @@ func (u *UserManager) EditUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userIDRequest, err := basicauth.UserIDFromRequest(r)
+	if err != nil {
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(Response{"error": err.Error()})
+		return
+	}
+
 	user.Id = userID
+	user.UserIDCreator = userIDRequest
 
 	err = u.userManager.EditUser(r.Context(), &user)
 
 	pErr, ok := err.(*pq.Error)
 	if ok {
-		log.Println("pErr code ---->", string(pErr.Code))
 		switch string(pErr.Code) {
-		case P_ERR_VIOLATES_FOREIGN_KEY:
+		case P_ERR_VIOLATES_FOREIGN_KEY, P_ERR_DATA_NOT_FOUND:
 			w.Header().Add("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(Response{"error": err.Error()})
@@ -224,9 +247,36 @@ func (u *UserManager) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userIDRequest, err := basicauth.UserIDFromRequest(r)
+	if err != nil {
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(Response{"error": err.Error()})
+		return
+	}
+
+	if userIDRequest == userID {
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(Response{"error": "you can't delete yourself"})
+		return
+	}
+
 	err = u.userManager.DeleteUser(r.Context(), &model.UserInfo{
 		Id: userID,
 	})
+
+	pErr, ok := err.(*pq.Error)
+	if ok {
+		switch string(pErr.Code) {
+		case P_ERR_DATA_NOT_FOUND:
+			w.Header().Add("Content-Type", "application/json; charset=utf-8")
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(Response{"error": err.Error()})
+			return
+		}
+	}
+
 	if err != nil {
 		w.Header().Add("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusInternalServerError)

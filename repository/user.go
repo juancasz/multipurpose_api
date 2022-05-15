@@ -71,7 +71,6 @@ func (u *UserManager) GetUser(ctx context.Context, user *model.UserInfo) error {
 		return errors.New("error p_get_user NULL output")
 	}
 
-	user.Id = ""
 	if err = json.Unmarshal([]byte(str.String), user); err != nil {
 		return err
 	}

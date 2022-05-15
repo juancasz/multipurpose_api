@@ -23,10 +23,13 @@ func main() {
 		log.Fatal(err)
 	}
 
+	loginManagerRepository := repository.NewLoginManager(db)
+
 	routes := router.New(handler.Handler{
-		CalculatorHandler:  handler.NewCalculator(service.NewCalculator()),
-		UserManagerHandler: handler.NewUserManager(service.NewUserManager(repository.NewUserManager(db))),
-	})
+		CalculatorHandler:   handler.NewCalculator(service.NewCalculator()),
+		UserManagerHandler:  handler.NewUserManager(service.NewUserManager(repository.NewUserManager(db))),
+		LoginManagerHandler: handler.NewLoginManager(service.NewLoginManager(loginManagerRepository)),
+	}, loginManagerRepository)
 
 	svr := server.New(&server.Options{
 		Port:   os.Getenv("PORT"),

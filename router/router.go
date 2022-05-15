@@ -1,7 +1,10 @@
 package router
 
 import (
+	"context"
 	"multipurpose_api/handler"
+	basicauth "multipurpose_api/infrastructure/basic_auth"
+	"multipurpose_api/model"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -9,7 +12,11 @@ import (
 	"github.com/go-chi/cors"
 )
 
-func New(h handler.Handler) http.Handler {
+type userCredentialManager interface {
+	GetUserCredentials(ctx context.Context, username string) (*model.UserCredentials, error)
+}
+
+func New(h handler.Handler, managerAuth userCredentialManager) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -30,21 +37,51 @@ func New(h handler.Handler) http.Handler {
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
 
-	r.Mount("/multipurpose-api", routesMultipurposeAPI(h))
+	r.Mount("/multipurpose-api", routesMultipurposeAPI(h, managerAuth))
 
 	return r
 }
 
-func routesMultipurposeAPI(h handler.Handler) http.Handler {
+func routesMultipurposeAPI(h handler.Handler, managerAuth userCredentialManager) http.Handler {
 	r := chi.NewRouter()
 
-	r.Post("/order-array", h.CalculatorHandler.OrderArray)
-	r.Post("/balance-months", h.CalculatorHandler.BalanceMonths)
+	r.Mount("/login", routesLogin(h.LoginManagerHandler))
+	r.Mount("/calculator", routesCalculator(h.CalculatorHandler, managerAuth))
+	r.Mount("/user", routesUser(h.UserManagerHandler, managerAuth))
 
-	r.Post("/user", h.UserManagerHandler.AddUser)
-	r.Get("/user/{user_id}", h.UserManagerHandler.GetUser)
-	r.Put("/user/{user_id}", h.UserManagerHandler.EditUser)
-	r.Delete("/user/{user_id}", h.UserManagerHandler.DeleteUser)
+	return r
+}
+
+func routesLogin(login handler.LoginManagerHandler) http.Handler {
+	r := chi.NewRouter()
+
+	r.Post("/", login.Login)
+
+	return r
+}
+
+func routesCalculator(calculator handler.CalculatorHandler, managerAuth userCredentialManager) http.Handler {
+	r := chi.NewRouter()
+
+	//Basic auth
+	r.Use(basicauth.Middleware(managerAuth))
+
+	r.Post("/order-array", calculator.OrderArray)
+	r.Post("/balance-months", calculator.BalanceMonths)
+
+	return r
+}
+
+func routesUser(userManager handler.UserManagerHandler, managerAuth userCredentialManager) http.Handler {
+	r := chi.NewRouter()
+
+	//Basic auth
+	r.Use(basicauth.Middleware(managerAuth))
+
+	r.Post("/", userManager.AddUser)
+	r.Get("/{user_id}", userManager.GetUser)
+	r.Put("/{user_id}", userManager.EditUser)
+	r.Delete("/{user_id}", userManager.DeleteUser)
 
 	return r
 }

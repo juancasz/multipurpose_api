@@ -4,5 +4,5 @@ import "errors"
 
 var (
 	ErrInvalidInputBalanceMonths = errors.New("the provided input is not coherent")
-	ErrUserNotFound              = errors.New("user not found")
+	ErrInvalidUsernameOrPassword = errors.New("invalid username or password")
 )
