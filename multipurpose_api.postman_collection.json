@@ -1,0 +1,242 @@
+{
+	"info": {
+		"_postman_id": "20800498-45fd-41d6-8195-6535ed4814b9",
+		"name": "multipurpose_api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"juan123\",\n    \"password\": \"password_test\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8888/multipurpose-api/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"multipurpose-api",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "order-array",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic anVhbjEyMzpwYXNzd29yZF90ZXN0",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sin_clasificar\": [3,5,5,6,8,3,4,4,7,7,1,1,2]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8888/multipurpose-api/calculator/order-array",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"multipurpose-api",
+						"calculator",
+						"order-array"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "balance-months",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic anVhbjEyMzpwYXNzd29yZF90ZXN0",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"Mes\": [\"Enero\", \"Febrero\", \"Marzo\", \"Abril\"],\n    \"Ventas\": [30500, 35600, 28300, 33900],\n    \"Gastos\": [35600, 23400, 18100, 20700]\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8888/multipurpose-api/calculator/balance-months",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"multipurpose-api",
+						"calculator",
+						"balance-months"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add user",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic anVhbjEyMzpwYXNzd29yZF90ZXN0",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Felipe\",\n    \"country_id\": 1,\n    \"university_id\": 1,\n    \"username\": \"felipe123\",\n    \"password\": \"felipe-password\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8888/multipurpose-api/user",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"multipurpose-api",
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic anVhbjEyMzpwYXNzd29yZF90ZXN0",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8888/multipurpose-api/user/0c299523-0aeb-42d8-ac44-e2f1d5f04c05",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"multipurpose-api",
+						"user",
+						"0c299523-0aeb-42d8-ac44-e2f1d5f04c05"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit user",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic anVhbjEyMzpwYXNzd29yZF90ZXN0",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Camilo\",\n    \"country_id\": 1,\n    \"university_id\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8888/multipurpose-api/user/0c299523-0aeb-42d8-ac44-e2f1d5f04c05",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"multipurpose-api",
+						"user",
+						"0c299523-0aeb-42d8-ac44-e2f1d5f04c05"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete user",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic anVhbjEyMzpwYXNzd29yZF90ZXN0",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8888/multipurpose-api/user/0c299523-0aeb-42d8-ac44-e2f1d5f04c05",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"multipurpose-api",
+						"user",
+						"0c299523-0aeb-42d8-ac44-e2f1d5f04c05"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
