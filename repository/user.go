@@ -78,3 +78,61 @@ func (u *UserManager) GetUser(ctx context.Context, user *model.UserInfo) error {
 
 	return nil
 }
+
+func (u *UserManager) EditUser(ctx context.Context, user *model.User) error {
+	data, err := json.Marshal(user)
+	if err != nil {
+		return err
+	}
+
+	tx, err := u.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	row := tx.QueryRowContext(ctx, callEditUser, string(data))
+	if err = row.Err(); err != nil {
+		return err
+	}
+
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *UserManager) DeleteUser(ctx context.Context, user *model.UserInfo) error {
+	data, err := json.Marshal(user)
+	if err != nil {
+		return err
+	}
+
+	tx, err := u.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	row := tx.QueryRowContext(ctx, callDeleteUser, string(data))
+	if err = row.Err(); err != nil {
+		return err
+	}
+
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+}

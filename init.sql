@@ -141,6 +141,8 @@ BEGIN
     END IF;  
 
 EXCEPTION
+    WHEN SQLSTATE '23503' THEN
+        RAISE EXCEPTION 'Error [p_add_user: not found country or not found university  [%]:  % ]', SQLSTATE, SQLERRM USING ERRCODE = SQLSTATE;
     WHEN OTHERS THEN
         RAISE EXCEPTION 'Error [p_edit_user: uncontrolled error  [%]:  % ]', SQLSTATE, SQLERRM;
 END;

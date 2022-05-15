@@ -11,6 +11,8 @@ import (
 type userManagerRepository interface {
 	AddUser(ctx context.Context, user *model.User) error
 	GetUser(ctx context.Context, user *model.UserInfo) error
+	EditUser(ctx context.Context, user *model.User) error
+	DeleteUser(ctx context.Context, user *model.UserInfo) error
 }
 
 func NewUserManager(userManager userManagerRepository) *UserManager {
@@ -44,4 +46,12 @@ func (u *UserManager) GetUser(ctx context.Context, user *model.UserInfo) error {
 	}
 
 	return nil
+}
+
+func (u *UserManager) EditUser(ctx context.Context, user *model.User) error {
+	return u.userManager.EditUser(ctx, user)
+}
+
+func (u *UserManager) DeleteUser(ctx context.Context, user *model.UserInfo) error {
+	return u.userManager.DeleteUser(ctx, user)
 }
