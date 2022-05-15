@@ -7,8 +7,16 @@ type CalculatorHandler interface {
 	BalanceMonths(w http.ResponseWriter, r *http.Request)
 }
 
+type UserManagerHandler interface {
+	AddUser(w http.ResponseWriter, r *http.Request)
+	GetUser(w http.ResponseWriter, r *http.Request)
+	EditUser(w http.ResponseWriter, r *http.Request)
+	DeleteUser(w http.ResponseWriter, r *http.Request)
+}
+
 type Handler struct {
 	CalculatorHandler
+	UserManagerHandler
 }
 
 type Response map[string]interface{}

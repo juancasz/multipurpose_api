@@ -30,16 +30,21 @@ func New(h handler.Handler) http.Handler {
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
 
-	r.Mount("/multipurpose-api", routesMultipurposeAPI(h.CalculatorHandler))
+	r.Mount("/multipurpose-api", routesMultipurposeAPI(h))
 
 	return r
 }
 
-func routesMultipurposeAPI(calculator handler.CalculatorHandler) http.Handler {
+func routesMultipurposeAPI(h handler.Handler) http.Handler {
 	r := chi.NewRouter()
 
-	r.Post("/order-array", calculator.OrderArray)
-	r.Post("/balance-months", calculator.BalanceMonths)
+	r.Post("/order-array", h.CalculatorHandler.OrderArray)
+	r.Post("/balance-months", h.CalculatorHandler.BalanceMonths)
+
+	r.Post("/user", h.UserManagerHandler.AddUser)
+	r.Get("/user/{user_id}", h.UserManagerHandler.GetUser)
+	r.Put("/user/{user_id}", h.UserManagerHandler.EditUser)
+	r.Delete("/user/{user_id}", h.UserManagerHandler.DeleteUser)
 
 	return r
 }

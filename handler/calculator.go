@@ -17,7 +17,7 @@ type calculatorService interface {
 
 func NewCalculator(calculator calculatorService) *Calculator {
 	if calculator == nil {
-		panic("missing calculator while creating Calculator")
+		panic("missing calculator while creating Calculator handler")
 	}
 
 	return &Calculator{

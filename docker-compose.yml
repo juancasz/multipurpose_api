@@ -26,3 +26,8 @@ services:
     image: multipurpose_api
     environment:
       - "PORT=8888"
+      - "DB_HOST=postgres_database"
+      - "DB_PORT=5432"
+      - "DB_NAME=postgres_database"
+      - "DB_USER=postgres"
+      - "DB_PASSWORD=admin"
