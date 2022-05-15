@@ -10,4 +10,11 @@ type (
 		HashPassword  string `json:"hash_password"`
 		UserIDCreator string `json:"user_id_creator"`
 	}
+
+	UserInfo struct {
+		Id         string `json:"id"`
+		Name       string `json:"name"`
+		Country    string `json:"country"`
+		University string `json:"university"`
+	}
 )

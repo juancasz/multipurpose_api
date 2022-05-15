@@ -3,13 +3,20 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"multipurpose_api/model"
+	"multipurpose_api/service"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 type userManagerService interface {
 	AddUser(ctx context.Context, user *model.User) error
+	GetUser(ctx context.Context, user *model.UserInfo) error
 }
 
 func NewUserManager(
@@ -74,6 +81,19 @@ func (u *UserManager) AddUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = u.userManager.AddUser(r.Context(), &user)
+
+	pErr, ok := err.(*pq.Error)
+
+	if ok {
+		switch string(pErr.Code) {
+		case P_ERR_VIOLATES_FOREIGN_KEY:
+			w.Header().Add("Content-Type", "application/json; charset=utf-8")
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(Response{"error": err.Error()})
+			return
+		}
+	}
+
 	if err != nil {
 		w.Header().Add("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -86,7 +106,40 @@ func (u *UserManager) AddUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(Response{"message": "success"})
 }
 
-func (u *UserManager) GetUser(w http.ResponseWriter, r *http.Request) {}
+func (u *UserManager) GetUser(w http.ResponseWriter, r *http.Request) {
+	userID := chi.URLParam(r, "user_id")
+
+	_, err := uuid.Parse(userID)
+	if err != nil {
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(Response{"error": `url param "user_id" is not an uuid`})
+		return
+	}
+
+	user := model.UserInfo{
+		Id: userID,
+	}
+
+	err = u.userManager.GetUser(r.Context(), &user)
+	if errors.Is(err, service.ErrUserNotFound) {
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(Response{"error": err.Error()})
+		return
+	}
+
+	if err != nil {
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(Response{"error": err.Error()})
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(user)
+}
 
 func (u *UserManager) EditUser(w http.ResponseWriter, r *http.Request) {}
 

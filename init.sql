@@ -74,6 +74,8 @@ BEGIN
     INSERT INTO users VALUES(r_user.*);
 
 EXCEPTION
+    WHEN SQLSTATE '23503' THEN
+        RAISE EXCEPTION 'Error [p_add_user: not found country or not found university  [%]:  % ]', SQLSTATE, SQLERRM USING ERRCODE = SQLSTATE;
     WHEN OTHERS THEN
         RAISE EXCEPTION 'Error [p_add_user: uncontrolled error  [%]:  % ]', SQLSTATE, SQLERRM;
 END;
@@ -110,7 +112,7 @@ BEGIN
 
 EXCEPTION
     WHEN OTHERS THEN
-        RAISE EXCEPTION 'Error [p_get_user: uncontrolled error  [%]:  % ]', SQLSTATE, SQLERRM;
+        RAISE EXCEPTION 'Error [p_get_user: uncontrolled error  [%]:  % ]', SQLSTATE, SQLERRM ;
 END;
 $BODY$;
 

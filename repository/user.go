@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"multipurpose_api/model"
 )
 
@@ -44,6 +45,34 @@ func (u *UserManager) AddUser(ctx context.Context, user *model.User) error {
 	}
 
 	if err = tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *UserManager) GetUser(ctx context.Context, user *model.UserInfo) error {
+	data, err := json.Marshal(user)
+	if err != nil {
+		return err
+	}
+
+	row := u.DB.QueryRowContext(ctx, callGetUser, string(data), nil)
+	if err = row.Err(); err != nil {
+		return err
+	}
+
+	str := new(sql.NullString)
+	if err = row.Scan(str); err != nil {
+		return err
+	}
+
+	if !str.Valid {
+		return errors.New("error p_get_user NULL output")
+	}
+
+	user.Id = ""
+	if err = json.Unmarshal([]byte(str.String), user); err != nil {
 		return err
 	}
 

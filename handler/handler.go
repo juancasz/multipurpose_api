@@ -20,3 +20,7 @@ type Handler struct {
 }
 
 type Response map[string]interface{}
+
+const (
+	P_ERR_VIOLATES_FOREIGN_KEY = "23503"
+)
