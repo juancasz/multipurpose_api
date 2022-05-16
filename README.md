@@ -10,10 +10,11 @@ This project can be run using docker compose in the following way:
 After starting the container, the REST API endpoints will be available at localhost:8888 and a PostgreSQL database will appear at localhost:5432. The following parameters can be used to connect to the created database:
    
 ```
-    DB_HOST=postgres_database
+    DB_HOST=localhost
     DB_PORT=5432
     DB_NAME=postgres_database
     DB_USER=postgres
+    DB_PASSWORD=admin
 ```
   
 The relevant tables in the database are:  
